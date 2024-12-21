@@ -21,14 +21,18 @@ const Celda: React.FC<CeldaProps> = ({ nodo }) => {
 
     const color = getColor(nodo.tipo);
 
-    const renderFlecha = (flecha: number) => (
-        <div className={nodo.flecha === flecha ? 'bg-red-500' : ''}></div>
-    );
-
     return (
         <div className='relative w-20 h-20'>
             <div className={`w-20 h-20 text-[8px] place-content-between grid grid-cols-3 grid-rows-3 ${color}`}>
-                {Array.from({ length: 9 }, (_, i) => renderFlecha(i + 1))}
+                <div className={nodo.flecha == 1 ? 'bg-red-500' : ''}></div>
+                <div className={nodo.flecha == 2 ? 'bg-red-500' : ''}></div>
+                <div className={nodo.flecha == 3 ? 'bg-red-500' : ''}></div>
+                <div className={nodo.flecha == 4 ? 'bg-red-500' : ''}></div>
+                <div className={nodo.flecha == 5 ? 'bg-red-500' : ''}></div>
+                <div className={nodo.flecha == 6 ? 'bg-red-500' : ''}></div>
+                <div className={nodo.flecha == 7 ? 'bg-red-500' : ''}></div>
+                <div className={nodo.flecha == 8 ? 'bg-red-500' : ''}></div>
+                <div className={nodo.flecha == 9 ? 'bg-red-500' : ''}></div>
             </div>
             {nodo.tipo !== 3 && (
                 <div className='w-10 h-10 flex flex-wrap absolute top-5 left-5'>

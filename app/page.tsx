@@ -2,70 +2,98 @@
 
 import Tablero from "@/components/tablero";
 import Nodo from "@/models/nodo";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const filas = 20;
-const columnas = 20;
-const obstaculos = 150;
-let mapaInicial: Nodo[][] = [];
+let mapaActual: Nodo[][] = [];
 let inicio = { fila: 0, columna: 0 };
 let fin = { fila: 0, columna: 0 };
 
 let listaAbierta: Nodo[] = [];
 let listaCerrada: Nodo[] = [];
 
-function ruta(nodo: Nodo){
+const filas = 12;
+const columnas = 23;
+const obstaculos = 75;
+
+const generarMapa = (): Nodo[][] => {
+  const mapa: Nodo[][] = [];
+  for (let i = 0; i < filas; i++) {
+    const fila: Nodo[] = [];
+    for (let j = 0; j < columnas; j++) {
+      fila.push(new Nodo(i, j, 0, 0, 0, 0, 0, 0));
+    }
+    mapa.push(fila);
+  }
+  return mapa;
+};
+
+const generarObstaculos = (mapa: Nodo[][]): Nodo[][] => {
+  let obstaculosGenerados = 0;
+  while (obstaculosGenerados < obstaculos) {
+    const fila = Math.floor(Math.random() * filas);
+    const columna = Math.floor(Math.random() * columnas);
+    if (mapa[fila][columna].tipo === 0) {
+      mapa[fila][columna].tipo = 3;
+      obstaculosGenerados++;
+    }
+  }
+    
+  return mapa;
+};
+
+
+
+const ruta = (nodo: Nodo) => {
   nodo.tipo = 5;
-  if(nodo.anterior != null){
+  if (nodo.anterior != null) {
     ruta(nodo.anterior);
   }
-}
+};
 
 export default function Home() {
   const [mapa, setMapa] = useState<Nodo[][]>([]);
 
-  function generarMapa() {
-    mapaInicial = [];
+  useEffect(() => {
+    console.log('useEffect');
+    nuevoMapa();
+  }, []);
 
-    for (let i = 0; i < filas; i++) {
-      const fila = [];
-      for (let j = 0; j < columnas; j++) {
-        fila.push(new Nodo(i, j, 0, 0, 0, 0, 0, 0));
-      }
-      mapaInicial.push(fila);
-    }
-  
-    
-  
-    inicio = {fila: Math.ceil(Math.random() * filas - 1), columna: Math.ceil(Math.random() * columnas - 1)};
-    do {
-      fin = {fila: Math.ceil(Math.random() * filas - 1), columna: Math.ceil(Math.random() * columnas - 1)};
-    } while (inicio.fila == fin.fila && inicio.columna == fin.columna);
-
-    mapaInicial[inicio.fila][inicio.columna].tipo = 1;
-    mapaInicial[inicio.fila][inicio.columna].anterior = null;
-
-    mapaInicial[fin.fila][fin.columna].tipo = 2;
-
-    for (let i = 0; i < obstaculos; i++) {
-      const fila = Math.floor(Math.random() * filas);
-      const columna = Math.floor(Math.random() * columnas);
-      if (mapaInicial[fila][columna].tipo == 0) {
-        mapaInicial[fila][columna].tipo = 3;
-      } else {
-        i--;
+  const limpiarMapa = (): void => {
+    for (const fila of mapaActual) {
+      for (const nodo of fila) {
+        if (nodo.tipo == 0 || nodo.tipo == 4 || nodo.tipo == 5) {
+          nodo.g = 0;
+          nodo.h = 0;
+          nodo.f = 0;
+          nodo.anterior = null;
+          nodo.tipo = 0;
+        }
       }
     }
-  
     listaAbierta = [];
     listaCerrada = [];
   
-    listaAbierta.push(mapaInicial[inicio.fila][inicio.columna]);
+    listaAbierta.push(mapaActual[inicio.fila][inicio.columna]);
   
-    setMapa([...mapaInicial]);
+    setMapa([...mapaActual]);
   }
 
-  function calcular(){
+  function buscarRuta() {
+    limpiarMapa();
+    calcular();
+  }
+
+  function buscarRutaRapido() {
+    limpiarMapa();
+    calcular(50);
+  }
+
+  function buscarRutaLento() {
+    limpiarMapa();
+    calcular(500);
+  }
+
+  function calcular(espera: number = 0) {
     if(listaAbierta.length == 0){
       return;
     }
@@ -77,9 +105,7 @@ export default function Home() {
     if (nodoActual.tipo == 0){
       nodoActual.tipo = 4;
     }
-    console.log(nodoActual);
     listaCerrada.push(nodoActual);
-
 
     const vecinos = [];
 
@@ -157,20 +183,48 @@ export default function Home() {
 
     listaAbierta.sort((a, b) => a.f - b.f);
 
-
-
     setMapa([...mapa]);
 
-    setTimeout(calcular, 1);
+    if (espera > 0) {
+      setTimeout(() => calcular(espera), espera);
+    } else {
+      calcular();
+    }
+  }
+
+  function nuevoMapa() {
+    mapaActual = generarMapa();
+    console.log(mapaActual);
+
+    inicio = {fila: Math.ceil(Math.random() * filas - 1), columna: Math.ceil(Math.random() * columnas - 1)};
+    do {
+      fin = {fila: Math.ceil(Math.random() * filas - 1), columna: Math.ceil(Math.random() * columnas - 1)};
+    } while (inicio.fila == fin.fila && inicio.columna == fin.columna);
+
+    mapaActual[inicio.fila][inicio.columna].tipo = 1;
+    mapaActual[inicio.fila][inicio.columna].anterior = null;
+
+    mapaActual[fin.fila][fin.columna].tipo = 2;
+
+    const mapaConObstaculos = generarObstaculos(mapaActual);
+
+    listaAbierta = [];
+    listaCerrada = [];
+  
+    listaAbierta.push(mapaActual[inicio.fila][inicio.columna]);
+
+    setMapa(mapaConObstaculos);
   }
 
   return (
     <>
-    <div className="overflow-auto">
-      <Tablero mapa={mapa}/>
+      <div className="overflow-auto">
+        <Tablero mapa={mapa}/>
       </div>
-      <button className="bg-blue-500 text-white p-2" onClick={calcular}>Siguiente paso</button>
-      <button className="bg-red-500 text-white p-2" onClick={generarMapa}>Reiniciar</button>
+      <button className="bg-blue-500 text-white p-2" onClick={buscarRuta}>Buscar ruta</button>
+      <button className="bg-blue-500 text-white p-2" onClick={buscarRutaRapido}>Buscar ruta rapido</button>
+      <button className="bg-blue-500 text-white p-2" onClick={buscarRutaLento}>Buscar ruta despacio</button>
+      <button className="bg-red-500 text-white p-2" onClick={nuevoMapa}>Nuevo mapa</button>
     </>
   );
 }

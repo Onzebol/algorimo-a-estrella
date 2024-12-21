@@ -10,10 +10,10 @@ interface TableroProps {
   
   const Tablero: React.FC<TableroProps> = ({mapa}) => {
       return (
-        <div className={"flex flex-wrap gap-[1px] w-[" + (mapa[0]?.length*80 + (mapa[0]?.length-1)*1) + "px] bg-black"}>
-          {mapa.map((element, x) => (
-            element.map((n, y) => (
-              <Celda key={`${x}-${y}`} nodo={n} />
+        <div style={{ gridTemplateColumns: `repeat(${mapa[0] ? mapa[0].length : 1}, 80px)`}} className={`grid justify-center align-middle gap-[1px] bg-gray-600`}>
+          {mapa.map((fila, i) => (
+            fila.map((nodo, j) => (
+              <Celda key={i + '-' + j} nodo={nodo} />
             ))
           ))}
         </div>
