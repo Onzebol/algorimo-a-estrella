@@ -13,14 +13,15 @@ let listaCerrada: Nodo[] = [];
 
 const filas = 12;
 const columnas = 23;
-const obstaculos = 75;
+const obstaculos = 90;
+const usarDiagonales = true;
 
 const generarMapa = (): Nodo[][] => {
   const mapa: Nodo[][] = [];
   for (let i = 0; i < filas; i++) {
     const fila: Nodo[] = [];
     for (let j = 0; j < columnas; j++) {
-      fila.push(new Nodo(i, j, 0, 0, 0, 0, 0, 0));
+      fila.push(new Nodo(i, j, 0, 0, 0, 0, 0));
     }
     mapa.push(fila);
   }
@@ -41,7 +42,30 @@ const generarObstaculos = (mapa: Nodo[][]): Nodo[][] => {
   return mapa;
 };
 
+function limpiarMapa(mapa: Nodo[][]): Nodo[][] {
+  const mapaNuevo = [...mapa];
+  for (const fila of mapaNuevo) {
+    for (const nodo of fila) {
+      if (nodo.tipo == 0 || nodo.tipo == 4 || nodo.tipo == 5) {
+        nodo.g = 0;
+        nodo.h = 0;
+        nodo.f = 0;
+        nodo.anterior = null;
+        nodo.tipo = 0;
+        nodo.actualizaciones = 0;
+      }
+    }
+  }
 
+  return mapaNuevo;
+}
+
+function inicializarListas() {
+  listaAbierta = [];
+  listaCerrada = [];
+
+  listaAbierta.push(mapaActual[inicio.fila][inicio.columna]);
+}
 
 const ruta = (nodo: Nodo) => {
   nodo.tipo = 5;
@@ -58,38 +82,21 @@ export default function Home() {
     nuevoMapa();
   }, []);
 
-  const limpiarMapa = (): void => {
-    for (const fila of mapaActual) {
-      for (const nodo of fila) {
-        if (nodo.tipo == 0 || nodo.tipo == 4 || nodo.tipo == 5) {
-          nodo.g = 0;
-          nodo.h = 0;
-          nodo.f = 0;
-          nodo.anterior = null;
-          nodo.tipo = 0;
-        }
-      }
-    }
-    listaAbierta = [];
-    listaCerrada = [];
-  
-    listaAbierta.push(mapaActual[inicio.fila][inicio.columna]);
-  
-    setMapa([...mapaActual]);
-  }
-
   function buscarRuta() {
-    limpiarMapa();
+    setMapa(limpiarMapa(mapaActual));
+    inicializarListas();
     calcular();
   }
 
   function buscarRutaRapido() {
-    limpiarMapa();
+    setMapa(limpiarMapa(mapaActual));
+    inicializarListas();
     calcular(50);
   }
 
   function buscarRutaLento() {
-    limpiarMapa();
+    setMapa(limpiarMapa(mapaActual));
+    inicializarListas();
     calcular(500);
   }
 
@@ -109,39 +116,48 @@ export default function Home() {
 
     const vecinos = [];
 
-    if(nodoActual.fila > 0 && nodoActual.columna > 0){
-      vecinos.push(mapa[nodoActual.fila - 1][nodoActual.columna - 1]);
-      vecinos[vecinos.length - 1].peso = 14;
-    }
-    if(nodoActual.fila > 0 && nodoActual.columna < columnas - 1){
-      vecinos.push(mapa[nodoActual.fila - 1][nodoActual.columna + 1]);
-      vecinos[vecinos.length - 1].peso = 14;
-    }
-    if(nodoActual.fila < filas - 1 && nodoActual.columna > 0){
-      vecinos.push(mapa[nodoActual.fila + 1][nodoActual.columna - 1]);
-      vecinos[vecinos.length - 1].peso = 14;
-    }
-    if(nodoActual.fila < filas - 1 && nodoActual.columna < columnas - 1){
-      vecinos.push(mapa[nodoActual.fila + 1][nodoActual.columna + 1]);
-      vecinos[vecinos.length - 1].peso = 14;
+    if (usarDiagonales) {
+      if(nodoActual.fila > 0 && nodoActual.columna > 0){
+        vecinos.push(mapa[nodoActual.fila - 1][nodoActual.columna - 1]);
+        vecinos[vecinos.length - 1].peso = 14;
+        //vecinos[vecinos.length - 1].flecha = 9;
+      }
+      if(nodoActual.fila > 0 && nodoActual.columna < columnas - 1){
+        vecinos.push(mapa[nodoActual.fila - 1][nodoActual.columna + 1]);
+        vecinos[vecinos.length - 1].peso = 14;
+        //vecinos[vecinos.length - 1].flecha = 7;
+      }
+      if(nodoActual.fila < filas - 1 && nodoActual.columna > 0){
+        vecinos.push(mapa[nodoActual.fila + 1][nodoActual.columna - 1]);
+        vecinos[vecinos.length - 1].peso = 14;
+        //vecinos[vecinos.length - 1].flecha = 3;
+      }
+      if(nodoActual.fila < filas - 1 && nodoActual.columna < columnas - 1){
+        vecinos.push(mapa[nodoActual.fila + 1][nodoActual.columna + 1]);
+        vecinos[vecinos.length - 1].peso = 14;
+        //vecinos[vecinos.length - 1].flecha = 1;
+      }
     }
     if(nodoActual.fila > 0){
       vecinos.push(mapa[nodoActual.fila - 1][nodoActual.columna]);
       vecinos[vecinos.length - 1].peso = 10;
+      //vecinos[vecinos.length - 1].flecha = 8;
     }
     if(nodoActual.columna > 0){
       vecinos.push(mapa[nodoActual.fila][nodoActual.columna - 1]);
       vecinos[vecinos.length - 1].peso = 10;
+      //vecinos[vecinos.length - 1].flecha = 6;
     }
     if(nodoActual.fila < filas - 1){
       vecinos.push(mapa[nodoActual.fila + 1][nodoActual.columna]);
       vecinos[vecinos.length - 1].peso = 10;
+      //[vecinos.length - 1].flecha = 2;
     }
     if(nodoActual.columna < columnas - 1){
       vecinos.push(mapa[nodoActual.fila][nodoActual.columna + 1]);
       vecinos[vecinos.length - 1].peso = 10;
+      //vecinos[vecinos.length - 1].flecha = 4;
     }
-
 
     for(const vecino of vecinos){
       if(vecino.tipo == 2){
@@ -177,6 +193,7 @@ export default function Home() {
           vecino.h = h;
           vecino.f = f;
           vecino.anterior = nodoActual;
+          vecino.actualizaciones++;
         }
       }
     }
@@ -194,7 +211,6 @@ export default function Home() {
 
   function nuevoMapa() {
     mapaActual = generarMapa();
-    console.log(mapaActual);
 
     inicio = {fila: Math.ceil(Math.random() * filas - 1), columna: Math.ceil(Math.random() * columnas - 1)};
     do {
@@ -224,7 +240,7 @@ export default function Home() {
       <button className="bg-blue-500 text-white p-2" onClick={buscarRuta}>Buscar ruta</button>
       <button className="bg-blue-500 text-white p-2" onClick={buscarRutaRapido}>Buscar ruta rapido</button>
       <button className="bg-blue-500 text-white p-2" onClick={buscarRutaLento}>Buscar ruta despacio</button>
-      <button className="bg-red-500 text-white p-2" onClick={nuevoMapa}>Nuevo mapa</button>
+      <button className="bg-red-500 text-white p-2" onClick={nuevoMapa}>Nuevo mapa aleatorio</button>
     </>
   );
 }
