@@ -19,10 +19,31 @@ const Celda: React.FC<CeldaProps> = ({ nodo }) => {
         }
     };
 
+    const getParedesCss = (nodo: Nodo) => {
+        const paredes = nodo.paredes;
+        let css = '';
+        if (paredes.arriba) {
+            css += 'border-t-2 border-black ';
+        }
+        if (paredes.derecha) {
+            css += 'border-r-2 border-black ';
+        }
+        if (paredes.abajo) {
+            css += 'border-b-2 border-black ';
+        }
+        if (paredes.izquierda) {
+            css += 'border-l-2 border-black ';
+        }
+
+        return css;
+    }
+
+
     const color = getColor(nodo.tipo);
+    const paredesCss = getParedesCss(nodo);
 
     return (
-        <div className={`w-12 h-12 ${color} flex justify-center items-center`}> 
+        <div className={`w-12 h-12 ${color} flex justify-center items-center ${paredesCss}`}> 
             {nodo.tipo !== 3 && (
                 <div className='w-10 h-10 flex flex-wrap justify-center'>
                     <p className='w-4 text-[8px]'>{nodo.g || ''}</p>

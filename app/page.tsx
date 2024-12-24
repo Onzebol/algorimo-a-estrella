@@ -14,6 +14,7 @@ let listaCerrada: Nodo[] = [];
 const filas = 12;
 const columnas = 23;
 const obstaculos = 90;
+const paredes = 110;
 const usarDiagonales = true;
 
 const generarMapa = (): Nodo[][] => {
@@ -41,6 +42,113 @@ const generarObstaculos = (mapa: Nodo[][]): Nodo[][] => {
     
   return mapa;
 };
+
+function generarParedes(mapa: Nodo[][]): Nodo[][] {
+  let paredesGeneradas = 0;
+  while (paredesGeneradas < paredes) {
+    const fila = Math.floor(Math.random() * filas);
+    const columna = Math.floor(Math.random() * columnas);
+    if (mapa[fila][columna].tipo === TipoNodo.VACIO && mapa[fila][columna].paredes.arriba === false && mapa[fila][columna].paredes.derecha === false && mapa[fila][columna].paredes.abajo === false && mapa[fila][columna].paredes.izquierda === false) {
+      mapa[fila][columna].paredes = { arriba: Math.random() < 0.5, derecha: Math.random() < 0.5, abajo: Math.random() < 0.5, izquierda: Math.random() < 0.5 };
+
+      if (mapa[fila][columna].paredes.arriba === true && fila > 0) {
+        mapa[fila - 1][columna].paredes.abajo = true;
+      }
+      if (mapa[fila][columna].paredes.derecha === true && columna < columnas - 1) {
+        mapa[fila][columna + 1].paredes.izquierda = true;
+      }
+      if (mapa[fila][columna].paredes.abajo === true && fila < filas - 1) {
+        mapa[fila + 1][columna].paredes.arriba = true;
+      }
+      if (mapa[fila][columna].paredes.izquierda === true && columna > 0) {
+        mapa[fila][columna - 1].paredes.derecha = true;
+      }
+      paredesGeneradas++;
+    }
+  }
+
+  return mapa;
+}
+
+function verificarParedEnMedio(origen: Nodo, destino: Nodo): boolean {
+  if (origen.fila === destino.fila) {
+    return verificarParedHorizontal(origen, destino);
+  } else if (origen.columna === destino.columna) {
+    return verificarParedVertical(origen, destino);
+  } else {
+    return verificarParedDiagonal(origen, destino);
+  }
+}
+
+function verificarParedHorizontal(origen: Nodo, destino: Nodo): boolean {
+  if (origen.columna < destino.columna) {
+    return origen.paredes.derecha || destino.paredes.izquierda;
+  } else {
+    return origen.paredes.izquierda || destino.paredes.derecha;
+  }
+}
+
+function verificarParedVertical(origen: Nodo, destino: Nodo): boolean {
+  if (origen.fila < destino.fila) {
+    return origen.paredes.abajo || destino.paredes.arriba;
+  } else {
+    return origen.paredes.arriba || destino.paredes.abajo;
+  }
+}
+
+function verificarParedDiagonal(origen: Nodo, destino: Nodo): boolean {
+  if (origen.fila > destino.fila) {
+    if (origen.columna < destino.columna) {
+      return verificarParedArribaDerecha(origen, destino);
+    } else {
+      return verificarParedArribaIzquierda(origen, destino);
+    }
+  } else {
+    if (origen.columna < destino.columna) {
+      return verificarParedAbajoDerecha(origen, destino);
+    } else {
+      return verificarParedAbajoIzquierda(origen, destino);
+    }
+  }
+}
+
+function verificarParedArribaDerecha(origen: Nodo, destino: Nodo): boolean {
+  return (
+    (origen.paredes.derecha && origen.paredes.arriba) ||
+    (destino.paredes.izquierda && destino.paredes.abajo) ||
+    (origen.paredes.arriba && destino.paredes.abajo) ||
+    (origen.paredes.derecha && destino.paredes.izquierda)
+  );
+}
+
+function verificarParedArribaIzquierda(origen: Nodo, destino: Nodo): boolean {
+  return (
+    (origen.paredes.izquierda && origen.paredes.arriba) ||
+    (destino.paredes.derecha && destino.paredes.abajo) ||
+    (origen.paredes.arriba && destino.paredes.abajo) ||
+    (origen.paredes.izquierda && destino.paredes.derecha)
+  );
+}
+
+function verificarParedAbajoDerecha(origen: Nodo, destino: Nodo): boolean {
+  return (
+    (origen.paredes.derecha && origen.paredes.abajo) ||
+    (destino.paredes.izquierda && destino.paredes.arriba) ||
+    (origen.paredes.abajo && destino.paredes.arriba) ||
+    (origen.paredes.derecha && destino.paredes.izquierda)
+  );
+}
+
+function verificarParedAbajoIzquierda(origen: Nodo, destino: Nodo): boolean {
+  return (
+    (origen.paredes.izquierda && origen.paredes.abajo) ||
+    (destino.paredes.derecha && destino.paredes.arriba) ||
+    (origen.paredes.abajo && destino.paredes.arriba) ||
+    (origen.paredes.izquierda && destino.paredes.derecha)
+  );
+}
+
+
 
 function limpiarMapa(mapa: Nodo[][]): Nodo[][] {
   const mapaNuevo = [...mapa];
@@ -152,7 +260,12 @@ export default function Home() {
     }
 
     for(const vecino of vecinos){
-      if(vecino.tipo == 2){
+      console.log('vecino', vecino);
+      console.log(verificarParedEnMedio(nodoActual, vecino));
+      if(verificarParedEnMedio(nodoActual, vecino)){
+        continue;
+      }
+      if(vecino.tipo == TipoNodo.FIN){
         console.log('Llegamos');
         vecino.anterior = nodoActual;
         ruta(vecino);
@@ -162,7 +275,7 @@ export default function Home() {
         listaAbierta = [];
         return;
       }
-      if(vecino.tipo == 1 || vecino.tipo == 3){
+      if(vecino.tipo == TipoNodo.INICIO || vecino.tipo == TipoNodo.OBSTACULO){
         continue;
       }
       if(listaCerrada.includes(vecino)){
@@ -202,6 +315,7 @@ export default function Home() {
 
     setMapa([...mapa]);
 
+
     if (espera > 0) {
       setTimeout(() => calcular(espera), espera);
     } else {
@@ -222,14 +336,16 @@ export default function Home() {
 
     mapaActual[fin.fila][fin.columna].tipo = TipoNodo.FIN;
 
-    const mapaConObstaculos = generarObstaculos(mapaActual);
+    //const mapaConObstaculos = generarObstaculos(mapaActual);
+
+    const mapaConParedes = generarParedes(mapaActual);
 
     listaAbierta = [];
     listaCerrada = [];
   
     listaAbierta.push(mapaActual[inicio.fila][inicio.columna]);
 
-    setMapa(mapaConObstaculos);
+    setMapa(mapaConParedes);
   }
 
   return (

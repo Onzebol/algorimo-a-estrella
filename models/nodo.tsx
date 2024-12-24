@@ -10,6 +10,7 @@ class Nodo {
     actualizaciones: number = 0;
     creado: Date = new Date();
     actualizado: Date = new Date();
+    paredes: { arriba: boolean, derecha: boolean, abajo: boolean, izquierda: boolean } = { arriba: false, derecha: false, abajo: false, izquierda: false };
 
     constructor(fila: number, columna: number, g: number, h: number, f: number, tipo: number, peso: number) {
         this.fila = fila;
