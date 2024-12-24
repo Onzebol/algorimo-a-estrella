@@ -8,6 +8,8 @@ class Nodo {
     peso: number;
     anterior: Nodo | null = null;
     actualizaciones: number = 0;
+    creado: Date = new Date();
+    actualizado: Date = new Date();
 
     constructor(fila: number, columna: number, g: number, h: number, f: number, tipo: number, peso: number) {
         this.fila = fila;

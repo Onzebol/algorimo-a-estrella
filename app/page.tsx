@@ -120,43 +120,35 @@ export default function Home() {
       if(nodoActual.fila > 0 && nodoActual.columna > 0){
         vecinos.push(mapa[nodoActual.fila - 1][nodoActual.columna - 1]);
         vecinos[vecinos.length - 1].peso = 14;
-        //vecinos[vecinos.length - 1].flecha = 9;
       }
       if(nodoActual.fila > 0 && nodoActual.columna < columnas - 1){
         vecinos.push(mapa[nodoActual.fila - 1][nodoActual.columna + 1]);
         vecinos[vecinos.length - 1].peso = 14;
-        //vecinos[vecinos.length - 1].flecha = 7;
       }
       if(nodoActual.fila < filas - 1 && nodoActual.columna > 0){
         vecinos.push(mapa[nodoActual.fila + 1][nodoActual.columna - 1]);
         vecinos[vecinos.length - 1].peso = 14;
-        //vecinos[vecinos.length - 1].flecha = 3;
       }
       if(nodoActual.fila < filas - 1 && nodoActual.columna < columnas - 1){
         vecinos.push(mapa[nodoActual.fila + 1][nodoActual.columna + 1]);
         vecinos[vecinos.length - 1].peso = 14;
-        //vecinos[vecinos.length - 1].flecha = 1;
       }
     }
     if(nodoActual.fila > 0){
       vecinos.push(mapa[nodoActual.fila - 1][nodoActual.columna]);
       vecinos[vecinos.length - 1].peso = 10;
-      //vecinos[vecinos.length - 1].flecha = 8;
     }
     if(nodoActual.columna > 0){
       vecinos.push(mapa[nodoActual.fila][nodoActual.columna - 1]);
       vecinos[vecinos.length - 1].peso = 10;
-      //vecinos[vecinos.length - 1].flecha = 6;
     }
     if(nodoActual.fila < filas - 1){
       vecinos.push(mapa[nodoActual.fila + 1][nodoActual.columna]);
       vecinos[vecinos.length - 1].peso = 10;
-      //[vecinos.length - 1].flecha = 2;
     }
     if(nodoActual.columna < columnas - 1){
       vecinos.push(mapa[nodoActual.fila][nodoActual.columna + 1]);
       vecinos[vecinos.length - 1].peso = 10;
-      //vecinos[vecinos.length - 1].flecha = 4;
     }
 
     for(const vecino of vecinos){
@@ -186,6 +178,7 @@ export default function Home() {
         vecino.h = h;
         vecino.f = f;
         vecino.anterior = nodoActual;
+        vecino.actualizado = new Date();  
         listaAbierta.push(vecino);
       } else {
         if(g < vecino.g){
@@ -193,12 +186,19 @@ export default function Home() {
           vecino.h = h;
           vecino.f = f;
           vecino.anterior = nodoActual;
+          vecino.actualizado = new Date();
           vecino.actualizaciones++;
         }
       }
     }
 
-    listaAbierta.sort((a, b) => a.f - b.f);
+    listaAbierta.sort((a, b) => {
+      if (a.f === b.f) {
+        return b.actualizado.getTime() - a.actualizado.getTime();
+      }
+
+      return a.f - b.f;
+    });
 
     setMapa([...mapa]);
 
