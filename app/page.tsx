@@ -1,7 +1,7 @@
 "use client"
 
 import Tablero from "@/components/tablero";
-import Nodo from "@/models/nodo";
+import Nodo, { TipoNodo } from "@/models/nodo";
 import { useEffect, useState } from "react";
 
 let mapaActual: Nodo[][] = [];
@@ -34,7 +34,7 @@ const generarObstaculos = (mapa: Nodo[][]): Nodo[][] => {
     const fila = Math.floor(Math.random() * filas);
     const columna = Math.floor(Math.random() * columnas);
     if (mapa[fila][columna].tipo === 0) {
-      mapa[fila][columna].tipo = 3;
+      mapa[fila][columna].tipo = TipoNodo.OBSTACULO;
       obstaculosGenerados++;
     }
   }
@@ -68,7 +68,7 @@ function inicializarListas() {
 }
 
 const ruta = (nodo: Nodo) => {
-  nodo.tipo = 5;
+  nodo.tipo = TipoNodo.CAMINO;
   if (nodo.anterior != null) {
     ruta(nodo.anterior);
   }
@@ -110,7 +110,7 @@ export default function Home() {
       return;
     }
     if (nodoActual.tipo == 0){
-      nodoActual.tipo = 4;
+      nodoActual.tipo = TipoNodo.VISITADO;
     }
     listaCerrada.push(nodoActual);
 
@@ -217,10 +217,10 @@ export default function Home() {
       fin = {fila: Math.ceil(Math.random() * filas - 1), columna: Math.ceil(Math.random() * columnas - 1)};
     } while (inicio.fila == fin.fila && inicio.columna == fin.columna);
 
-    mapaActual[inicio.fila][inicio.columna].tipo = 1;
+    mapaActual[inicio.fila][inicio.columna].tipo = TipoNodo.INICIO;
     mapaActual[inicio.fila][inicio.columna].anterior = null;
 
-    mapaActual[fin.fila][fin.columna].tipo = 2;
+    mapaActual[fin.fila][fin.columna].tipo = TipoNodo.FIN;
 
     const mapaConObstaculos = generarObstaculos(mapaActual);
 
