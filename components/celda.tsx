@@ -38,7 +38,6 @@ const Celda: React.FC<CeldaProps> = ({ nodo }) => {
         return css;
     }
 
-
     const color = getColor(nodo.tipo);
     const paredesCss = getParedesCss(nodo);
 

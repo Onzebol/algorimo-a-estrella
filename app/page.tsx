@@ -11,11 +11,11 @@ let fin = { fila: 0, columna: 0 };
 let listaAbierta: Nodo[] = [];
 let listaCerrada: Nodo[] = [];
 
-const filas = 12;
-const columnas = 23;
+const filas = 20;
+const columnas = 30;
 const obstaculos = 90;
-const paredes = 110;
-const usarDiagonales = true;
+const paredes = 200;
+const usarDiagonales = false;
 
 const generarMapa = (): Nodo[][] => {
   const mapa: Nodo[][] = [];
@@ -53,16 +53,34 @@ function generarParedes(mapa: Nodo[][]): Nodo[][] {
 
       if (mapa[fila][columna].paredes.arriba === true && fila > 0) {
         mapa[fila - 1][columna].paredes.abajo = true;
+        if(mapa[fila-1][columna].paredes.arriba && mapa[fila-1][columna].paredes.derecha && mapa[fila-1][columna].paredes.abajo && mapa[fila-1][columna].paredes.izquierda){
+          mapa[fila-1][columna].tipo = TipoNodo.OBSTACULO;
+        }
       }
       if (mapa[fila][columna].paredes.derecha === true && columna < columnas - 1) {
         mapa[fila][columna + 1].paredes.izquierda = true;
+        if(mapa[fila][columna+1].paredes.arriba && mapa[fila][columna+1].paredes.derecha && mapa[fila][columna+1].paredes.abajo && mapa[fila][columna+1].paredes.izquierda){
+          mapa[fila][columna+1].tipo = TipoNodo.OBSTACULO;
+        }
       }
       if (mapa[fila][columna].paredes.abajo === true && fila < filas - 1) {
         mapa[fila + 1][columna].paredes.arriba = true;
+        if(mapa[fila+1][columna].paredes.arriba && mapa[fila+1][columna].paredes.derecha && mapa[fila+1][columna].paredes.abajo && mapa[fila+1][columna].paredes.izquierda){
+          mapa[fila+1][columna].tipo = TipoNodo.OBSTACULO;
+        }
       }
       if (mapa[fila][columna].paredes.izquierda === true && columna > 0) {
         mapa[fila][columna - 1].paredes.derecha = true;
+        if(mapa[fila][columna-1].paredes.arriba && mapa[fila][columna-1].paredes.derecha && mapa[fila][columna-1].paredes.abajo && mapa[fila][columna-1].paredes.izquierda){
+          mapa[fila][columna-1].tipo = TipoNodo.OBSTACULO;
+        }
+        
       }
+
+      if(mapa[fila][columna].paredes.arriba && mapa[fila][columna].paredes.derecha && mapa[fila][columna].paredes.abajo && mapa[fila][columna].paredes.izquierda){
+        mapa[fila][columna].tipo = TipoNodo.OBSTACULO;
+      }
+
       paredesGeneradas++;
     }
   }
