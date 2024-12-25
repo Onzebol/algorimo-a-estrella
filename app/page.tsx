@@ -10,12 +10,13 @@ let fin = { fila: 0, columna: 0 };
 
 let listaAbierta: Nodo[] = [];
 let listaCerrada: Nodo[] = [];
+let listaLaberinto: Nodo[] = [];
 
 const filas = 20;
 const columnas = 30;
 const obstaculos = 90;
 const paredes = 200;
-const usarDiagonales = true;
+const usarDiagonales = false;
 
 const generarMapa = (): Nodo[][] => {
   const mapa: Nodo[][] = [];
@@ -42,6 +43,61 @@ const generarObstaculos = (mapa: Nodo[][]): Nodo[][] => {
     
   return mapa;
 };
+
+function generarLaberinto(mapa: Nodo[][]): Nodo[][] {
+  if (listaLaberinto.length === 0) {
+    return mapa;
+  }
+  const nodoActual = listaLaberinto[listaLaberinto.length - 1];
+  
+  const vecinos = [];
+  if (nodoActual.fila > 0 && mapa[nodoActual.fila - 1][nodoActual.columna].tipo !== TipoNodo.VISITADO_LABERINTO) {
+    vecinos.push(mapa[nodoActual.fila - 1][nodoActual.columna]);
+  }
+  if (nodoActual.columna > 0 && mapa[nodoActual.fila][nodoActual.columna - 1].tipo !== TipoNodo.VISITADO_LABERINTO) {
+    vecinos.push(mapa[nodoActual.fila][nodoActual.columna - 1]);
+  }
+  if (nodoActual.fila < filas - 1 && mapa[nodoActual.fila + 1][nodoActual.columna].tipo !== TipoNodo.VISITADO_LABERINTO) {
+    vecinos.push(mapa[nodoActual.fila + 1][nodoActual.columna]);
+  }
+  if (nodoActual.columna < columnas - 1 && mapa[nodoActual.fila][nodoActual.columna + 1].tipo !== TipoNodo.VISITADO_LABERINTO) {
+    vecinos.push(mapa[nodoActual.fila][nodoActual.columna + 1]);
+  }
+
+  if (vecinos.length === 0 && listaLaberinto.length > 0) {
+    listaLaberinto.pop();
+    return generarLaberinto(mapa);
+  }
+
+  const vecino = vecinos[Math.floor(Math.random() * vecinos.length)];
+
+  if (nodoActual.fila > vecino.fila) {
+    vecino.paredes.abajo = false;
+    nodoActual.paredes.arriba = false;
+    vecino.tipo = TipoNodo.VISITADO_LABERINTO;
+    listaLaberinto.push(vecino);
+  }
+  if (nodoActual.fila < vecino.fila) {
+    vecino.paredes.arriba = false;
+    nodoActual.paredes.abajo = false;
+    vecino.tipo = TipoNodo.VISITADO_LABERINTO;
+    listaLaberinto.push(vecino);
+  }
+  if (nodoActual.columna > vecino.columna) {
+    vecino.paredes.derecha = false;
+    nodoActual.paredes.izquierda = false;
+    vecino.tipo = TipoNodo.VISITADO_LABERINTO;
+    listaLaberinto.push(vecino);
+  }
+  if (nodoActual.columna < vecino.columna) {
+    vecino.paredes.izquierda = false;
+    nodoActual.paredes.derecha = false;
+    vecino.tipo = TipoNodo.VISITADO_LABERINTO;
+    listaLaberinto.push(vecino);
+  }
+
+  return generarLaberinto(mapa);
+}
 
 function generarParedes(mapa: Nodo[][]): Nodo[][] {
   let paredesGeneradas = 0;
@@ -172,12 +228,12 @@ function limpiarMapa(mapa: Nodo[][]): Nodo[][] {
   const mapaNuevo = [...mapa];
   for (const fila of mapaNuevo) {
     for (const nodo of fila) {
-      if (nodo.tipo == 0 || nodo.tipo == 4 || nodo.tipo == 5) {
+      if (nodo.tipo !== TipoNodo.INICIO && nodo.tipo !== TipoNodo.FIN) {
         nodo.g = 0;
         nodo.h = 0;
         nodo.f = 0;
         nodo.anterior = null;
-        nodo.tipo = 0;
+        nodo.tipo = TipoNodo.VACIO;
         nodo.actualizaciones = 0;
       }
     }
@@ -344,19 +400,24 @@ export default function Home() {
   function nuevoMapa() {
     mapaActual = generarMapa();
 
+    listaLaberinto = [];
+    listaLaberinto.push(mapaActual[Math.floor(Math.random() * filas)][Math.floor(Math.random() * columnas)]);
+
+    const mapaConParedes = generarLaberinto(mapaActual);
+
     inicio = {fila: Math.ceil(Math.random() * filas - 1), columna: Math.ceil(Math.random() * columnas - 1)};
     do {
       fin = {fila: Math.ceil(Math.random() * filas - 1), columna: Math.ceil(Math.random() * columnas - 1)};
     } while (inicio.fila == fin.fila && inicio.columna == fin.columna);
 
-    mapaActual[inicio.fila][inicio.columna].tipo = TipoNodo.INICIO;
-    mapaActual[inicio.fila][inicio.columna].anterior = null;
+    mapaConParedes[inicio.fila][inicio.columna].tipo = TipoNodo.INICIO;
+    mapaConParedes[inicio.fila][inicio.columna].anterior = null;
 
-    mapaActual[fin.fila][fin.columna].tipo = TipoNodo.FIN;
+    mapaConParedes[fin.fila][fin.columna].tipo = TipoNodo.FIN;
 
     //const mapaConObstaculos = generarObstaculos(mapaActual);
 
-    const mapaConParedes = generarParedes(mapaActual);
+    
 
     listaAbierta = [];
     listaCerrada = [];

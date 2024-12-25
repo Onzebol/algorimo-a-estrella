@@ -10,7 +10,7 @@ class Nodo {
     actualizaciones: number = 0;
     creado: Date = new Date();
     actualizado: Date = new Date();
-    paredes: { arriba: boolean, derecha: boolean, abajo: boolean, izquierda: boolean } = { arriba: false, derecha: false, abajo: false, izquierda: false };
+    paredes: { arriba: boolean, derecha: boolean, abajo: boolean, izquierda: boolean } = { arriba: true, derecha: true, abajo: true, izquierda: true };
 
     constructor(fila: number, columna: number, g: number, h: number, f: number, tipo: number, peso: number) {
         this.fila = fila;
@@ -29,7 +29,8 @@ export enum TipoNodo {
     FIN = 2,
     OBSTACULO = 3,
     VISITADO = 4,
-    CAMINO = 5
+    CAMINO = 5,
+    VISITADO_LABERINTO = 6,
 }
 
 export default Nodo;
