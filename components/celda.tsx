@@ -19,30 +19,10 @@ const Celda: React.FC<CeldaProps> = ({ nodo }) => {
         }
     };
 
-    const getParedesCss = (nodo: Nodo) => {
-        const paredes = nodo.paredes;
-        let css = '';
-        if (paredes.arriba) {
-            css += 'border-t-2 border-black ';
-        }
-        if (paredes.derecha) {
-            css += 'border-r-2 border-black ';
-        }
-        if (paredes.abajo) {
-            css += 'border-b-2 border-black ';
-        }
-        if (paredes.izquierda) {
-            css += 'border-l-2 border-black ';
-        }
-
-        return css;
-    }
-
     const color = getColor(nodo.tipo);
-    const paredesCss = getParedesCss(nodo);
 
     return (
-        <div className={`w-12 h-12 ${color} flex justify-center items-center ${paredesCss}`}> 
+        <div className={`w-12 h-12 ${color} flex justify-center items-center relative`}> 
             {nodo.tipo !== 3 && (
                 <div className='w-10 h-10 flex flex-wrap justify-center'>
                     <p className='w-4 text-[8px]'>{nodo.g || ''}</p>
@@ -51,6 +31,10 @@ const Celda: React.FC<CeldaProps> = ({ nodo }) => {
                     <p className='w-10 text-center font-bold'>{nodo.f || ''}</p>
                 </div>
             )}
+            {nodo.paredes.arriba && <div className={`w-[52px] h-[4px] bg-black absolute top-[-2px] left-[-2px] rounded-sm z-[9999]`}></div>}
+            {nodo.paredes.derecha && <div className={`w-[4px] h-[52px] bg-black absolute top-[-2px] right-[-2px] rounded-sm z-[9999]`}></div>}
+            {nodo.paredes.abajo && <div className={`w-[52px] h-[4px] bg-black absolute bottom-[-2px] left-[-2px] rounded-sm z-[9999]`}></div>}
+            {nodo.paredes.izquierda && <div className={`w-[4px] h-[52px] bg-black absolute top-[-2px] left-[-2px] rounded-sm z-[9999]`}></div>}
         </div>
     );
 };

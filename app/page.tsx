@@ -15,7 +15,7 @@ const filas = 20;
 const columnas = 30;
 const obstaculos = 90;
 const paredes = 200;
-const usarDiagonales = false;
+const usarDiagonales = true;
 
 const generarMapa = (): Nodo[][] => {
   const mapa: Nodo[][] = [];
